@@ -4,36 +4,33 @@ import { comparePassword } from "../utils/password.js";
 import { signToken } from "../utils/jwt.js";
 import type { LoginInput } from "../schemas/auth.schema.js";
 
-export const loginEmployee = async (credentials: LoginInput) => {
-  // 1. Find employee by email
-  const employee = await findEmployeeByEmail(credentials.email);
-  if (!employee) {
+export const loginEmployee = async (body: LoginInput) => {
+  const emp = await findEmployeeByEmail(body.email);
+  if (!emp) {
     throw new AppError("Invalid email or password", 401);
   }
 
-  // 2. Check password
-  const isPasswordCorrect = await comparePassword(credentials.password, employee.passwordHash);
-  if (!isPasswordCorrect) {
+  const isValid = await comparePassword(body.password, emp.passwordHash);
+  if (!isValid) {
     throw new AppError("Invalid email or password", 401);
   }
 
-  // 3. Generate JWT token
   const token = signToken({
-    userId: employee.id,
-    email: employee.email,
-    role: employee.role,
-    employeeCode: employee.employeeCode,
-    name: employee.name,
+    userId: emp.id,
+    email: emp.email,
+    role: emp.role,
+    employeeCode: emp.employeeCode,
+    name: emp.name,
   });
 
   return {
     token,
     employee: {
-      id: employee.id,
-      name: employee.name,
-      email: employee.email,
-      role: employee.role,
-      employeeCode: employee.employeeCode,
+      id: emp.id,
+      name: emp.name,
+      email: emp.email,
+      role: emp.role,
+      employeeCode: emp.employeeCode,
     },
   };
 };
