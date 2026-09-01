@@ -9,13 +9,13 @@ const startServer = async () => {
   try {
     // Check DB connection
     await prisma.$connect();
-    console.log("✅ Successfully connected to database");
+    console.log(" Successfully connected to database");
 
     server.listen(env.port, () => {
-      console.log(`🚀 Server running in ${env.nodeEnv} mode on port ${env.port}`);
+      console.log(` Server running in ${env.nodeEnv} mode on port ${env.port}`);
     });
   } catch (error) {
-    console.error("❌ Failed to start server:", error);
+    console.error(" Failed to start server:", error);
     process.exit(1);
   }
 };
