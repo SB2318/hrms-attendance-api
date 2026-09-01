@@ -2,7 +2,9 @@ import express from "express";
 import "express-async-errors"; // Handles async errors in express automatically
 import cors from "cors";
 import helmet from "helmet";
+import swaggerUi from "swagger-ui-express";
 import { env } from "./config/env.js";
+import swaggerSpec from "./config/swagger.js";
 
 // Routes
 import authRoutes from "./routes/auth.route.js";
@@ -22,12 +24,34 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ── Swagger UI ────────────────────────────────────────────────────────────────
+// Interactive API docs at GET /api-docs
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    customSiteTitle: "HRMS Attendance API Docs",
+    swaggerOptions: {
+      persistAuthorization: true, // JWT token survives page refresh
+      docExpansion: "list",       // show tag groups collapsed by default
+      filter: true,               // enable search bar
+    },
+  })
+);
+
+// Raw OpenAPI JSON spec at GET /api-docs.json (useful for Postman / code-gen)
+app.get("/api-docs.json", (_req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
+
 // Welcome Route
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
     message: "Welcome to HRMS Attendance API",
     env: env.nodeEnv,
+    docs: "/api-docs",
   });
 });
 
