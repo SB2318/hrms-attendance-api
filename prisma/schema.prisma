@@ -1,2 +1,49 @@
 
-// TODO
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  HR
+  MANAGER
+  EMPLOYEE
+}
+
+model Employee {
+  id            Int          @id @default(autoincrement())
+  name          String
+  email         String       @unique
+  passwordHash  String       @map("password_hash")
+  role          Role         @default(EMPLOYEE)
+  employeeCode  String       @unique @map("employee_code")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  attendances   Attendance[]
+
+  @@index([email])
+  @@index([employeeCode])
+  @@map("employees")
+}
+
+model Attendance {
+  id          Int       @id @default(autoincrement())
+  employeeId  Int       @map("employee_id")
+  date        DateTime
+  punchIn     DateTime? @map("punch_in")
+  punchOut    DateTime? @map("punch_out")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, date])
+  @@index([employeeId, date])
+  @@map("attendance")
+}
